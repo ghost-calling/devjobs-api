@@ -62,14 +62,15 @@ def insert_company(company_data: dict):
 def insert_job(job_data: dict):
     with get_db() as conn:
         conn.execute("""
-            INSERT INTO jobs (title, description, company_id, location, posted_date)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO jobs (title, description, company_id, location, posted_date, apply_url)
+            VALUES (?, ?, ?, ?, ?, ?)
             """,(          
                 job_data["title"],
                 job_data["description"],
                 job_data["company_id"],
                 job_data["location"],
-                job_data["posted_date"]
+                job_data["posted_date"],
+                job_data["apply_url"]
             ))
         conn.commit()
 
@@ -101,3 +102,34 @@ def get_job_with_details(job_id: int):
                 GROUP BY jobs.id, companies.name, companies.description, companies.website, companies.logo_url
             """, (job_id,)).fetchall()
             return [dict(row) for row in job_row]
+
+def get_or_create_company(name, description, website, logo_url):
+    with get_db() as conn:
+        existing = conn.execute("SELECT id FROM companies WHERE name = ?", (name,)).fetchone()
+        if existing:
+            return existing["id"]
+        else:
+            cursor = conn.execute("""
+                INSERT INTO companies (name, description, website, logo_url)
+                VALUES (?, ?, ?, ?)
+                """, (
+                    name,
+                    description,
+                    website,
+                    logo_url
+                ))
+            conn.commit()
+            return cursor.lastrowid
+
+def get_or_create_tag(name):
+    with get_db() as conn:
+        existing = conn.execute("SELECT id FROM tags WHERE name = ?", (name,)).fetchone()
+        if existing:
+            return existing["id"]
+        else:
+            cursor = conn.execute("""
+                    INSERT INTO tags (name)
+                    VALUES(?)
+                    """, (name,))
+            conn.commit()
+            return cursor.lastrowid
