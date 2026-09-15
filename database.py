@@ -32,6 +32,7 @@ def init_db():
                 location TEXT,
                 posted_date TEXT,
                 apply_url TEXT,
+                remote INTEGER,
                 FOREIGN KEY (company_id) REFERENCES companies(id));
             CREATE TABLE IF NOT EXISTS tags (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -63,15 +64,16 @@ def insert_company(company_data: dict):
 def insert_job(job_data: dict):
     with get_db() as conn:
             cursor = conn.execute("""
-            INSERT INTO jobs (title, description, company_id, location, posted_date, apply_url)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO jobs (title, description, company_id, location, posted_date, apply_url, remote)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
             """,(          
                 job_data["title"],
                 job_data["description"],
                 job_data["company_id"],
                 job_data["location"],
                 job_data["posted_date"],
-                job_data["apply_url"]
+                job_data["apply_url"],
+                job_data["remote"]
             ))
             conn.commit()
             return cursor.lastrowid
@@ -104,6 +106,10 @@ def get_job_with_details(job_id: int):
                 GROUP BY jobs.id, companies.name, companies.description, companies.website, companies.logo_url
             """, (job_id,)).fetchall()
             return [dict(row) for row in job_row]
+def get_all_jobs():
+    with get_db() as conn :
+        rows = conn.execute("SELECT * FROM jobs").fetchall()
+        return [dict(row) for row in rows]
 
 def get_or_create_company(name, description, website, logo_url):
     with get_db() as conn:
