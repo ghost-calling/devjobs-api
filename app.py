@@ -1,4 +1,6 @@
 from flask import Flask, request, jsonify
+from database import get_all_jobs, get_job_with_details
+from database import get_all_jobs
 from dotenv import load_dotenv
 import os
 
@@ -11,13 +13,29 @@ def check_api_key():
     if key == API_KEY:
         return True
     else:
-        return False    
+        return False 
+       
+@app.route("/jobs/<int:job_id>")
+def get_job(job_id):
+    # your turn
+    if not check_api_key():
+        return jsonify({"error": "Invalid or missing API key"}), 401
+
+    job = get_job_with_details(job_id)  
+
+    if not job:
+        return jsonify({"error": "Job Not Found"}), 404
+
+    return jsonify(job[0])
+
 @app.route("/jobs")
 def get_jobs():
     if not check_api_key():
         return jsonify({"error": "Invalid or missing API key"}), 401
-    from database import get_all_jobs
+    
     jobs = get_all_jobs()
+
     return jsonify(jobs)
+
 if __name__ == "__main__":
     app.run(debug=True)
