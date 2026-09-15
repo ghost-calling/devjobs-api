@@ -31,6 +31,7 @@ def init_db():
                 company_id INTEGER,
                 location TEXT,
                 posted_date TEXT,
+                apply_url TEXT,
                 FOREIGN KEY (company_id) REFERENCES companies(id));
             CREATE TABLE IF NOT EXISTS tags (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -61,7 +62,7 @@ def insert_company(company_data: dict):
 
 def insert_job(job_data: dict):
     with get_db() as conn:
-        conn.execute("""
+            cursor = conn.execute("""
             INSERT INTO jobs (title, description, company_id, location, posted_date, apply_url)
             VALUES (?, ?, ?, ?, ?, ?)
             """,(          
@@ -72,7 +73,8 @@ def insert_job(job_data: dict):
                 job_data["posted_date"],
                 job_data["apply_url"]
             ))
-        conn.commit()
+            conn.commit()
+            return cursor.lastrowid
 
 def insert_tag(tag_name: str):
     with get_db() as conn:
@@ -85,7 +87,7 @@ def insert_tag(tag_name: str):
 def insert_job_tag(job_id: int, tag_id: int):
     with get_db() as conn:
         conn.execute("""
-            INSERT INTO job_tags (job_id, tag_id)
+            INSERT OR IGNORE INTO job_tags (job_id, tag_id)
             VALUES (?, ?)
         """, (job_id, tag_id))
         conn.commit()
