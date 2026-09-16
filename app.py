@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
-from database import get_all_jobs, get_filtered_jobs, get_job_with_details
-from database import get_all_jobs
+from database import get_filtered_jobs, get_job_with_details
+from scraper import scrape_remoteok
+from database import get_job_with_details, get_all_jobs, get_filtered_jobs, init_db
 from dotenv import load_dotenv
 import os
 
@@ -47,4 +48,7 @@ def get_jobs():
     jobs = get_filtered_jobs(tag=tag, remote=remote)
     return jsonify(jobs)
 if __name__ == "__main__":
-    app.run(debug=True)
+    init_db()
+    scrape_remoteok()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
