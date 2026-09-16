@@ -12,7 +12,8 @@ CREATE TABLE jobs (
     apply_url TEXT,
     remote BOOLEAN NOT NULL DEFAULT 1,
     posted_at TEXT,
-    FOREIGN KEY (companies_id) REFERENCES companies(id)
+    remote INTEGER,
+    FOREIGN KEY (company_id) REFERENCES companies(id)
 );
 
 CREATE TABLE tags (

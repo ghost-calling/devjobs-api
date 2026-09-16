@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from database import get_all_jobs, get_job_with_details
+from database import get_all_jobs, get_filtered_jobs, get_job_with_details
 from database import get_all_jobs
 from dotenv import load_dotenv
 import os
@@ -33,9 +33,18 @@ def get_jobs():
     if not check_api_key():
         return jsonify({"error": "Invalid or missing API key"}), 401
     
-    jobs = get_all_jobs()
+    tag = request.args.get("tag")
+    remote_param = request.args.get("remote")
+    remote = None
+    if remote_param is not None:
+        if remote_param.lower() == "true":
+            remote = True
+        elif remote_param.lower() == "false":
+            remote = False
+        else:
+            return jsonify({"error": "Invalid value for 'remote' parameter. Use 'true' or 'false',"}), 400
 
+    jobs = get_filtered_jobs(tag=tag, remote=remote)
     return jsonify(jobs)
-
 if __name__ == "__main__":
     app.run(debug=True)

@@ -141,3 +141,30 @@ def get_or_create_tag(name):
                     """, (name,))
             conn.commit()
             return cursor.lastrowid
+
+def get_filtered_jobs(tag=None, remote=None):
+    with get_db() as conn:
+            query = """
+                SELECT jobs.*, companies.name AS company_name, companies.description AS company_description,
+                companies.website AS company_website, companies.logo_url AS company_logo_url, GROUP_CONCAT(tags.name) AS tags
+                FROM jobs JOIN companies ON jobs.company_id = companies.id
+                JOIN job_tags ON job_tags.job_id = jobs.id
+                JOIN tags ON tags.id = job_tags.tag_id
+                """
+            conditions = []
+            params = []
+
+            if tag:
+                conditions.append("tags.name = ?")
+                params.append(tag)
+
+            if remote:
+                conditions.append("jobs.remote = ?")
+                params.append(1 if remote else 0)
+
+            if conditions:
+                query += " WHERE " + " AND ".join(conditions)
+
+            query += " GROUP BY jobs.id, companies.name, companies.description, companies.website, companies.logo_url"
+            rows = conn.execute(query, params).fetchall()
+            return [dict(row) for row in rows]
