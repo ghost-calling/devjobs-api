@@ -9,7 +9,7 @@ a REST API with API-key authentication and filtering.
 I built this project to test my current skills by working with real job listings from a live job website and to see what I can handle and where my limitations are. I included remote jobs because remote work has become a common part of the current job market, and I wanted the project to reflect that.
 
 ## Live demo
-[deployed URL here once deployed]
+https://devjobs-api-idwk.onrender.com
 
 ## Architecture
 `scraper.py` (RemoteOK JSON) → SQLite (`database.py`, 4 normalized tables) → 
