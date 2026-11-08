@@ -8,8 +8,17 @@ a REST API with API-key authentication and filtering.
 
 I built this project to test my current skills by working with real job listings from a live job website and to see what I can handle and where my limitations are. I included remote jobs because remote work has become a common part of the current job market, and I wanted the project to reflect that.
 
-## Live demo
-https://devjobs-api-idwk.onrender.com
+## Live Demo
+
+- **Landing page:** https://devjobs-api-idwk.onrender.com/
+- **Try it now (no API key needed):** https://devjobs-api-idwk.onrender.com/demo
+
+> Hosted on a free tier. The first load after idle can take up to a minute.
+
+![Landing page](docs/landing-page.png)
+![Sample /demo response](docs/demo-response.png)
+
+> Hosted on a free tier. The first load after idle can take up to a minute while the server wakes up.
 
 ## Architecture
 `scraper.py` (RemoteOK JSON) → SQLite (`database.py`, 4 normalized tables) → 
@@ -30,8 +39,13 @@ Flask REST API (`app.py`, API-key auth)
 4. ** API-key auth via `.env`**: secret key never committed to git, loaded via python-dotenv, checked against `X-API-Key` header on every protected route.
 
 ## Endpoints
-- `GET /jobs` — list all jobs, optional `?tag=<name>` and `?remote=true|false` filters
-- `GET /jobs/<id>` — single job with full company + tag details
+
+| Endpoint | Auth | Description |
+|---|---|---|
+| `GET /` | none | Landing page |
+| `GET /demo` | none | Sample of 5 jobs |
+| `GET /jobs` | `X-API-KEY` header | All jobs; filters: `?tag=python&remote=true` |
+| `GET /jobs/<id>` | `X-API-KEY` header | One job with company and tags |
 
 ## AI-assistance disclosure
 Built with Claude as a learning/pair-programming tool — I wrote and debugged all 
@@ -42,6 +56,8 @@ junction tables, get-or-create patterns) and error diagnosis, not code generatio
 - SQLite (fine for demo; production would need Postgres for concurrent writes)
 - `remote` flag is heuristic, not authoritative
 - No pagination on `/jobs` yet (fine for 99 jobs, would need it at scale)
+- Runs on Flask's built-in development server; production would use gunicorn (which also requires moving DB initialization out of the `__main__` block).
+- The SQLite database is ephemeral on Render's free tier; it is re-seeded by a fresh scrape on every startup.
 
 ## Setup
 1. Install dependencies:
